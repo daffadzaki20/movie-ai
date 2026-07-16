@@ -10,13 +10,11 @@ class MovieController extends Controller
 {
     public function index(): JsonResponse
     {
-        // Mengambil semua data film dari database
-        $movies = Movie::all();
+        // Pastikan model Movie Anda memang memiliki kolom 'title' dan 'overview'
+        $movies = Movie::all(['id', 'title', 'overview']);
 
-        // Mengembalikan data dalam format JSON yang bersih untuk Python
         return response()->json([
             'success' => true,
-            'message' => 'List data film untuk AI',
             'data'    => $movies
         ], 200);
     }

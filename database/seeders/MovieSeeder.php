@@ -14,7 +14,7 @@ class MovieSeeder extends Seeder
         DB::table('movies')->truncate();
 
         // 2. Tentukan lokasi file CSV film kamu di folder python (ai)
-        $csvFile = base_path('../ai/dataset/tmdb_5000_movies.csv'); 
+        $csvFile = base_path('AI/dataset/tmdb_5000_movies.csv');
 
         // Cek apakah filenya ada
         if (!file_exists($csvFile)) {

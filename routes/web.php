@@ -14,8 +14,14 @@ Route::get('/register', [AuthController::class, 'showRegister']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
-// 3. Halaman Khusus Member (Wajib Login)
+
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () { return view('dashboard'); });
-    Route::get('/recommend', [MovieRecommendationController::class, 'index']);
+    // Dashboard untuk menampilkan daftar film terbaru
+    Route::get('/dashboard', [MovieRecommendationController::class, 'dashboard']);
+    
+    // Halaman khusus untuk hasil rekomendasi AI
+    Route::get('/recommend', [MovieRecommendationController::class, 'index'])->name('recommend');
 });
+
+Route::get('/movie/{movie_id}', [MovieRecommendationController::class, 'show'])->middleware('auth');
+Route::get('/movie/detail/{id}', [MovieRecommendationController::class, 'detail'])->middleware('auth');
