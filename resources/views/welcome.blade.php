@@ -20,12 +20,12 @@
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased">
 
-    <!-- Navbar -->
+    
     <nav class="sticky top-0 z-50 glass border-b border-slate-800">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <h2 class="text-2xl font-bold text-indigo-400 tracking-tight">MovieAI</h2>
             
-            <!-- Navbar Items (Sudah diperbaiki dengan items-center agar sejajar) -->
+           
             <div class="flex gap-6 items-center">
                 <a href="/login" class="text-slate-300 hover:text-white transition">Masuk</a>
                 <a href="/register" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-900/20">Daftar Gratis</a>
@@ -33,7 +33,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+   
     <header class="fade-in-section relative py-24 px-6 text-center overflow-hidden">
         <div class="absolute inset-0 bg-indigo-900/20 blur-[120px] rounded-full"></div>
         <h1 class="relative text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
@@ -47,7 +47,7 @@
         </a>
     </header>
 
-    <!-- How It Works Section -->
+    
     <section class="fade-in-section max-w-6xl mx-auto py-20 px-6">
         <h2 class="text-3xl font-bold text-center mb-16">Bagaimana MovieAI Bekerja?</h2>
         <div class="grid md:grid-cols-3 gap-12">
@@ -69,7 +69,7 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
+    
     <section class="fade-in-section bg-slate-900/50 py-16 border-y border-slate-800">
         <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div><div class="text-4xl font-bold text-indigo-400">10K+</div><div class="text-slate-400 text-sm mt-2">Film Terindeks</div></div>

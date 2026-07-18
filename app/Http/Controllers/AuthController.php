@@ -16,7 +16,7 @@ class AuthController extends Controller
     
     public function login(Request $request) 
     {
-        // Validasi input login
+        
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -39,7 +39,7 @@ class AuthController extends Controller
     
     public function register(Request $request) 
     {
-        // Validasi input register yang lebih aman
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',

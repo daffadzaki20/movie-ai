@@ -21,7 +21,7 @@
         </a>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <!-- Left Side: Poster & Info -->
+            
             <div class="lg:col-span-2">
                 <h1 id="title" class="text-7xl font-extrabold mb-6 leading-tight">{{ $movie->title }}</h1>
                 
@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <!-- Right Side: Interaction Card -->
+    
             <div class="space-y-6">
                 <div class="bg-gradient-to-br from-slate-900 to-black p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <h3 class="text-xl font-bold mb-6">Aksi Film</h3>

@@ -43,12 +43,20 @@
                 </div>
                 
                 @foreach($recommendations as $movie)
-                    <div class="p-6 bg-slate-800/60 glass rounded-2xl border border-slate-700 flex items-center gap-6 hover:border-indigo-500 transition">
-                        <div class="w-14 h-14 rounded-full bg-indigo-900/50 flex items-center justify-center font-bold text-indigo-300">
-                            {{ $loop->iteration }}
+                    <div class="p-4 bg-slate-800/60 glass rounded-2xl border border-slate-700 flex items-center gap-6 hover:border-indigo-500 transition group">
+                        <!-- Poster Film -->
+                        <div class="w-20 h-28 flex-shrink-0 overflow-hidden rounded-lg bg-slate-700 shadow-lg">
+                            @if($movie['poster'])
+                                <img src="{{ $movie['poster'] }}" alt="{{ $movie['title'] }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500 text-center p-1">No Poster</div>
+                            @endif
                         </div>
+                        
+                        <!-- Judul -->
                         <div>
-                            <h4 class="text-lg font-bold">{{ $movie }}</h4>
+                            <span class="text-indigo-400 font-bold text-sm block mb-1">#{{ $loop->iteration }}</span>
+                            <h4 class="text-lg font-bold group-hover:text-indigo-300 transition">{{ $movie['title'] }}</h4>
                         </div>
                     </div>
                 @endforeach

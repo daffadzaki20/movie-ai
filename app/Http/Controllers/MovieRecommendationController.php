@@ -9,10 +9,29 @@ use Illuminate\Support\Facades\Log;
 
 class MovieRecommendationController extends Controller
 {
-    // Fungsi untuk /dashboard
+    // Helper untuk mengambil poster dari TMDB
+    private function getMoviePoster($title)
+    {
+        try {
+            $apiKey = env('TMDB_API_KEY');
+            $response = Http::timeout(3)->get("https://api.themoviedb.org/3/search/movie", [
+                'api_key' => $apiKey,
+                'query' => $title
+            ]);
+
+            $data = $response->json();
+            if (!empty($data['results'])) {
+                $path = $data['results'][0]['poster_path'];
+                return $path ? "https://image.tmdb.org/t/p/w500" . $path : null;
+            }
+        } catch (\Exception $e) {
+            Log::error("TMDB Error: " . $e->getMessage());
+        }
+        return null;
+    }
+
     public function dashboard()
     {
-        // Mengambil data film dengan kategori berbeda
         $data = [
             'populer'  => \App\Models\Movie::latest()->limit(10)->get(),
             'action'   => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
@@ -21,13 +40,12 @@ class MovieRecommendationController extends Controller
             'comedy'   => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
         ];
         
-        // Mengirim variabel $data ke view
         return view('dashboard', compact('data'));
     }
-    // Fungsi untuk /recommend
+
     public function index(Request $request)
     {
-        $recommendations = null;
+        $recommendations = [];
         $searchedMovie = null;
         $error = null;
 
@@ -41,8 +59,16 @@ class MovieRecommendationController extends Controller
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    $recommendations = $data['recommendations'] ?? [];
+                    $titles = $data['recommendations'] ?? [];
                     $searchedMovie = $data['searched_movie'] ?? $movieTitle;
+
+                    // Mengubah daftar judul menjadi array yang berisi judul + poster
+                    foreach ($titles as $title) {
+                        $recommendations[] = [
+                            'title' => $title,
+                            'poster' => $this->getMoviePoster($title)
+                        ];
+                    }
                 } else {
                     $error = "Film tidak ditemukan atau API sedang bermasalah.";
                 }
@@ -52,19 +78,16 @@ class MovieRecommendationController extends Controller
             }
         }
 
-        // Mengirimkan hasil ke view 'recommendation' (sesuaikan nama filenya)
         return view('recommendation', compact('recommendations', 'searchedMovie', 'error'));
     }
 
     public function show($movie_id)
     {
-        // Ambil data film dari database berdasarkan movie_id
         $movie = \App\Models\Movie::where('movie_id', $movie_id)->firstOrFail();
-        
         return view('movie_detail', compact('movie'));
     }
 
-        public function detail($id)
+    public function detail($id)
     {
         $movie = \App\Models\Movie::findOrFail($id);
         return view('movie_detail', compact('movie'));

@@ -16,10 +16,10 @@ def init_data():
         response = requests.get(URL)
         data = response.json()
         
-        # Ambil list film dari key 'data'
+      
         df = pd.DataFrame(data['data'])
         
-        # Validasi kolom wajib
+        
         if 'overview' not in df.columns or 'title' not in df.columns:
             print(f"⚠️ Error: Kolom yang diterima: {df.columns.tolist()}")
             return False
@@ -27,7 +27,7 @@ def init_data():
         df['overview'] = df['overview'].fillna('')
         df['title_lower'] = df['title'].str.lower()
         
-        # Proses AI
+        
         tfidf = TfidfVectorizer(stop_words='english')
         tfidf_matrix = tfidf.fit_transform(df['overview'])
         cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
@@ -38,20 +38,19 @@ def init_data():
         print(f"⚠️ Gagal inisialisasi: {e}")
         return False
 
-# Inisialisasi saat server nyala
+
 init_data()
 
 @app.route('/api/recommend', methods=['GET'])
 def recommend():
-    movie_title = request.args.get('movie', '') # Sesuaikan dengan parameter dari Laravel
-    
+    movie_title = request.args.get('movie', '') 
     if df is None:
         return jsonify({'success': False, 'message': 'Data belum siap'}), 500
         
     if not movie_title:
         return jsonify({'success': False, 'message': 'Judul film kosong'}), 400
         
-    # Cari film
+  
     filtered = df[df['title_lower'] == movie_title.lower()]
     if filtered.empty:
         return jsonify({'success': False, 'message': 'Film tidak ditemukan'}), 404
