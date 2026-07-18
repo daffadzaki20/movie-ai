@@ -6,9 +6,17 @@
     <div id="{{ $id }}" class="grid grid-flow-col auto-cols-[180px] gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4">
         @foreach($movies as $movie)
         <a href="{{ url('/movie/detail', $movie->id) }}" class="group/card relative aspect-[2/3] rounded-lg overflow-hidden cursor-pointer shadow-lg hover:ring-4 hover:ring-red-600 transition duration-300">
-            <div class="w-full h-full bg-slate-800 flex items-center justify-center p-4 text-center">
-                <span class="font-bold text-sm">{{ $movie->title }}</span>
-            </div>
+            
+            <!-- LOGIKA POSTER -->
+            @if(isset($movie->poster_url) && $movie->poster_url)
+                <img src="{{ $movie->poster_url }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
+            @else
+                <div class="w-full h-full bg-slate-800 flex items-center justify-center p-4 text-center">
+                    <span class="font-bold text-sm">{{ $movie->title }}</span>
+                </div>
+            @endif
+
+            <!-- Overlay Judul Saat Hover -->
             <div class="absolute inset-0 bg-black/80 opacity-0 group-hover/card:opacity-100 transition p-4 flex flex-col justify-end">
                 <h4 class="font-bold text-sm">{{ $movie->title }}</h4>
             </div>

@@ -9,37 +9,48 @@ use Illuminate\Support\Facades\Log;
 
 class MovieRecommendationController extends Controller
 {
-    // Helper untuk mengambil poster dari TMDB
+    // Helper untuk mengambil poster dari TMDB dengan Cache
     private function getMoviePoster($title)
     {
-        try {
-            $apiKey = env('TMDB_API_KEY');
-            $response = Http::timeout(3)->get("https://api.themoviedb.org/3/search/movie", [
-                'api_key' => $apiKey,
-                'query' => $title
-            ]);
+        return cache()->remember('poster_' . md5($title), 86400, function () use ($title) {
+            try {
+                $apiKey = env('TMDB_API_KEY');
+                $response = Http::timeout(2)->get("https://api.themoviedb.org/3/search/movie", [
+                    'api_key' => $apiKey,
+                    'query' => $title
+                ]);
 
-            $data = $response->json();
-            if (!empty($data['results'])) {
-                $path = $data['results'][0]['poster_path'];
-                return $path ? "https://image.tmdb.org/t/p/w500" . $path : null;
+                $data = $response->json();
+                if (!empty($data['results']) && isset($data['results'][0]['poster_path'])) {
+                    return "https://image.tmdb.org/t/p/w500" . $data['results'][0]['poster_path'];
+                }
+            } catch (\Exception $e) {
+                Log::error("TMDB Error: " . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            Log::error("TMDB Error: " . $e->getMessage());
-        }
-        return null;
+            return null;
+        });
     }
 
     public function dashboard()
     {
-        $data = [
-            'populer'  => \App\Models\Movie::latest()->limit(10)->get(),
-            'action'   => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
-            'drama'    => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
-            'thriller' => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
-            'comedy'   => \App\Models\Movie::inRandomOrder()->limit(10)->get(),
+        // Menggunakan data acak karena tidak ada kolom 'genre' di database
+        $categories = [
+            'populer'  => Movie::latest()->limit(10)->get(),
+            'action'   => Movie::inRandomOrder()->limit(10)->get(),
+            'drama'    => Movie::inRandomOrder()->limit(10)->get(),
+            'thriller' => Movie::inRandomOrder()->limit(10)->get(),
+            'comedy'   => Movie::inRandomOrder()->limit(10)->get(),
         ];
+
+        // Menyisipkan URL poster ke setiap objek film menggunakan mapping
+        foreach ($categories as $key => $movies) {
+            $categories[$key] = $movies->map(function ($movie) {
+                $movie->poster_url = $this->getMoviePoster($movie->title);
+                return $movie;
+            });
+        }
         
+        $data = $categories;
         return view('dashboard', compact('data'));
     }
 
@@ -62,7 +73,6 @@ class MovieRecommendationController extends Controller
                     $titles = $data['recommendations'] ?? [];
                     $searchedMovie = $data['searched_movie'] ?? $movieTitle;
 
-                    // Mengubah daftar judul menjadi array yang berisi judul + poster
                     foreach ($titles as $title) {
                         $recommendations[] = [
                             'title' => $title,
@@ -83,13 +93,13 @@ class MovieRecommendationController extends Controller
 
     public function show($movie_id)
     {
-        $movie = \App\Models\Movie::where('movie_id', $movie_id)->firstOrFail();
+        $movie = Movie::where('movie_id', $movie_id)->firstOrFail();
         return view('movie_detail', compact('movie'));
     }
 
     public function detail($id)
     {
-        $movie = \App\Models\Movie::findOrFail($id);
+        $movie = Movie::findOrFail($id);
         return view('movie_detail', compact('movie'));
     }
 }
