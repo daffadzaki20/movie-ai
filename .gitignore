@@ -28,5 +28,5 @@ Thumbs.db
 venv/
 __pycache__/
 *.pyc
-# Mengabaikan semua file .pkl di dalam folder AI
-AI/**/*.pkl
+# File model yang ini ukurannya 176MB, melampaui batas 100MB GitHub!
+AI/src/similarity.pkl

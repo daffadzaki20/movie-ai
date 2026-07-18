@@ -71,11 +71,19 @@ Buka **terminal baru** (jangan tutup terminal Laravel yang sedang menjalankan pe
    pip install -r requirements.txt
    ```
 
-4. **Jalankan Server AI (Flask)**
+4. **Membangkitkan File Otak AI (Wajib!)**
+   Karena batasan ukuran file GitHub (maksimal 100MB), file `similarity.pkl` (ukuran 176MB) sengaja **tidak disertakan** di repositori ini. Anda harus menciptakannya secara lokal dengan cara menjalankan perintah:
    ```bash
-   python app.py
+   python src/generate_pkl.py
    ```
-   *(Peringatan: Pastikan server Laravel di port 8000 sudah berjalan sebelum Anda menjalankan langkah ini, karena skrip Python akan mencoba mengambil data film dari Laravel saat pertama kali dinyalakan).*
+   *(Tunggu 1-2 menit. Skrip ini akan otomatis membaca dataset, menghitung matriks TF-IDF, dan menyimpannya sebagai file `.pkl` di dalam folder `AI/src/`)*.
+
+5. **Jalankan Server AI (Flask API)**
+   Setelah file model sukses dibuat, jalankan server API agar Laravel bisa mulai meminta rekomendasi:
+   ```bash
+   python src/api.py
+   ```
+   *(Server Python kini berjalan di port 5000. Jangan ditutup!)*
 
 ---
 

@@ -3,6 +3,7 @@ from flask_cors import CORS
 import pickle
 import pandas as pd
 import os
+# Trigger reload
 
 app = Flask(__name__)
 CORS(app)
@@ -36,7 +37,7 @@ def get_recommendation():
     try:
         movie_index = movies[movies['title'].str.lower() == movie_title.lower()].index[0]
         distances = similarity[movie_index]
-        movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[0:6]
+        movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
         
         recommended_movies = []
         for i in movies_list:
