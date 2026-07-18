@@ -1,20 +1,20 @@
-import streamlit as st
+from flask import Flask, request, jsonify
 import pickle
 import pandas as pd
 import os
+from flask_cors import CORS # Tambahkan ini jika perlu
 
-# Menggunakan os.path.dirname(__file__) agar path selalu akurat berdasarkan lokasi file app.py
+app = Flask(__name__)
+CORS(app) # Agar Laravel aman saat memanggil API ini
+
+# --- Setup Path & Load Model (sama seperti punya Anda) ---
 current_dir = os.path.dirname(__file__)
 model_dir = os.path.abspath(os.path.join(current_dir, '..', 'models'))
 
-# Load data dictionary film
 movies_dict = pickle.load(open(os.path.join(model_dir, 'movie_dict.pkl'), 'rb'))
 movies = pd.DataFrame(movies_dict)
-
-# Load matriks similarity
 similarity = pickle.load(open(os.path.join(model_dir, 'similarity.pkl'), 'rb'))
 
-# Fungsi rekomendasi
 def recommend(movie_title):
     movie_index = movies[movies['title'] == movie_title].index[0]
     distances = similarity[movie_index]
@@ -25,19 +25,22 @@ def recommend(movie_title):
         recommended_movies.append(movies.iloc[i[0]].title)
     return recommended_movies
 
-# --- TAMPILAN WEB STREAMLIT ---
-st.title('Sistem Rekomendasi Film 🎬')
-
-# Buat dropdown pilihan film
-selected_movie_name = st.selectbox(
-    'Pilih film yang kamu suka:',
-    movies['title'].values
-)
-
-# Tombol untuk memicu rekomendasi
-if st.button('Cari Rekomendasi'):
-    recommendations = recommend(selected_movie_name)
+# --- INI BAGIAN PENTING: API ENDPOINT ---
+@app.route('/api/recommend', methods=['GET'])
+def get_recommendation():
+    movie_title = request.args.get('movie')
     
-    st.write("### Rekomendasi film untuk kamu:")
-    for idx, movie in enumerate(recommendations, 1):
-        st.write(f"**{idx}.** {movie}")
+    if not movie_title:
+        return jsonify({'error': 'Judul film tidak ada'}), 400
+    
+    try:
+        recommendations = recommend(movie_title)
+        return jsonify({
+            'searched_movie': movie_title,
+            'recommendations': recommendations
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(port=5000)
