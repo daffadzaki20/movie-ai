@@ -21,6 +21,17 @@ Route::middleware(['auth'])->group(function () {
     
     // Halaman khusus untuk hasil rekomendasi AI
     Route::get('/recommend', [MovieRecommendationController::class, 'index'])->name('recommend');
+
+    // My List
+    Route::get('/my-list', [App\Http\Controllers\MyListController::class, 'index'])->name('my-list.index');
+    Route::post('/my-list', [App\Http\Controllers\MyListController::class, 'store'])->name('my-list.store');
+
+    // Genre
+    Route::get('/genre', [App\Http\Controllers\GenreController::class, 'index'])->name('genre.index');
+    Route::get('/genre/{name}', [App\Http\Controllers\GenreController::class, 'show'])->name('genre.show');
+
+    // Profile (Update only, view is a modal)
+    Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::get('/movie/{movie_id}', [MovieRecommendationController::class, 'show'])->middleware('auth');

@@ -35,11 +35,18 @@
             <div class="space-y-6">
                 <div class="bg-gradient-to-br from-slate-900 to-black p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <h3 class="text-xl font-bold mb-6">Aksi Film</h3>
-                    <a id="trailerBtn" href="https://www.youtube.com/results?search_query={{ urlencode($movie->title) }}+trailer" 
-                       target="_blank"
-                       class="block text-center bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-600/30">
-                       Tonton Trailer
-                    </a>
+                    <div class="space-y-4">
+                        <a id="trailerBtn" href="https://www.youtube.com/results?search_query={{ urlencode($movie->title) }}+trailer" 
+                           target="_blank"
+                           class="block text-center bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-600/30">
+                           Tonton Trailer
+                        </a>
+
+                        <button id="myListBtn" data-movie-id="{{ $movie->movie_id }}"
+                                class="w-full text-center font-bold py-4 rounded-xl transition-all hover:scale-105 active:scale-95 border-2 {{ isset($inList) && $inList ? 'bg-white/20 border-white/50 text-white' : 'bg-transparent border-red-600 text-red-500 hover:bg-red-600/10' }}">
+                            {{ isset($inList) && $inList ? '✓ Hapus dari My List' : '+ Tambah ke My List' }}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white/5 p-6 rounded-3xl border border-white/5">
@@ -59,6 +66,35 @@
         btn.addEventListener('mouseout', () => {
             btn.classList.remove('shadow-red-500/50');
         });
+
+        // Add to My List AJAX
+        const myListBtn = document.getElementById('myListBtn');
+        if (myListBtn) {
+            myListBtn.addEventListener('click', function() {
+                const movieId = this.getAttribute('data-movie-id');
+                fetch('/my-list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ movie_id: movieId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.action === 'added') {
+                            this.innerText = '✓ Hapus dari My List';
+                            this.className = "w-full text-center font-bold py-4 rounded-xl transition-all hover:scale-105 active:scale-95 border-2 bg-white/20 border-white/50 text-white";
+                        } else {
+                            this.innerText = '+ Tambah ke My List';
+                            this.className = "w-full text-center font-bold py-4 rounded-xl transition-all hover:scale-105 active:scale-95 border-2 bg-transparent border-red-600 text-red-500 hover:bg-red-600/10";
+                        }
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+        }
     </script>
 </body>
 </html>

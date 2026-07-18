@@ -1,65 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Genre - MovieAI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .navbar-blur { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="bg-slate-950 text-white font-sans">
-    
-    <!-- Navbar -->
-    <nav id="navbar" class="fixed w-full z-50 p-6 flex justify-between items-center transition-all duration-300">
-        <h2 class="text-3xl font-bold text-red-600 tracking-tighter cursor-pointer">MOVIEAI</h2>
-        <div class="flex gap-8 items-center font-medium text-slate-300">
-            <a href="/dashboard" class="text-white border-b-2 border-red-600">Home</a>
-            <a href="/genre" class="hover:text-white transition">Genre</a>
-            <a href="/recommend" class="hover:text-white transition">Rekomendasi AI</a>
-            <a href="/my-list" class="hover:text-white transition">My List</a>
-        </div>
-        <div class="flex gap-4 items-center relative group">
-            <button class="flex items-center gap-2 hover:text-red-500 transition font-bold focus:outline-none">
-                {{ auth()->user()->name }}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+<body class="bg-slate-950 text-white font-sans antialiased min-h-screen">
+
+    <nav class="sticky top-0 z-50 glass border-b border-slate-800">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-indigo-400 tracking-tight">MovieAI</h2>
             
-            <!-- Dropdown Menu -->
-            <div class="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <div class="py-2">
-                    <button onclick="document.getElementById('profileModal').classList.remove('hidden')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-800 transition">Edit Profile</button>
-                    <form action="/logout" method="POST" class="m-0">
-                        @csrf
-                        <button class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-slate-800 transition">Logout</button>
-                    </form>
+            <div class="flex gap-8 items-center font-medium text-slate-300">
+                <a href="/dashboard" class="hover:text-white transition">Home</a>
+                <a href="/genre" class="text-white border-b-2 border-red-600 transition">Genre</a>
+                <a href="/recommend" class="hover:text-white transition">Rekomendasi AI</a>
+                <a href="/my-list" class="hover:text-white transition">My List</a>
+            </div>
+
+            <div class="flex gap-4 items-center relative group">
+                <button class="flex items-center gap-2 hover:text-red-500 transition font-bold focus:outline-none">
+                    {{ auth()->user()->name }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div class="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <div class="py-2">
+                        <button onclick="document.getElementById('profileModal').classList.remove('hidden')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-800 transition">Edit Profile</button>
+                        <form action="/logout" method="POST" class="m-0">
+                            @csrf
+                            <button class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-slate-800 transition">Logout</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <div class="relative w-full h-[70vh] flex items-center px-12 bg-slate-900 overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent z-10"></div>
-        <div class="relative z-20 max-w-2xl mt-16">
-            <h1 class="text-7xl font-extrabold mb-6 tracking-tighter leading-tight">Temukan <br><span class="text-red-600">Film Favoritmu</span></h1>
-            <p class="text-xl text-slate-300 mb-8">Dapatkan rekomendasi cerdas berbasis AI yang disesuaikan dengan selera unikmu.</p>
-            <div class="flex gap-4">
-                <a href="/recommend" class="bg-red-600 text-white px-8 py-4 font-bold rounded-lg hover:bg-red-700 transition transform hover:scale-105">Mulai Rekomendasi</a>
-            </div>
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        <h1 class="text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">Jelajahi Berdasarkan Genre</h1>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            @foreach($genres as $genre)
+            <a href="{{ route('genre.show', $genre) }}" class="group relative h-40 rounded-xl overflow-hidden cursor-pointer shadow-lg hover:ring-4 hover:ring-indigo-500 transition duration-300">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 to-slate-900 opacity-80 group-hover:opacity-100 transition duration-300"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <h3 class="text-2xl font-bold text-white group-hover:scale-110 transition duration-300">{{ $genre }}</h3>
+                </div>
+            </a>
+            @endforeach
         </div>
-    </div>
-
-    <!-- Container untuk Kategori -->
-    <div class="py-10">
-        {{-- Kita panggil kategori di sini. Pastikan controller Anda mengirim $data --}}
-        @include('components.movie-row', ['title' => 'Populer Sekarang', 'id' => 'row1', 'movies' => $data['populer']])
-        @include('components.movie-row', ['title' => 'Action', 'id' => 'row2', 'movies' => $data['action']])
-        @include('components.movie-row', ['title' => 'Drama', 'id' => 'row3', 'movies' => $data['drama']])
-        @include('components.movie-row', ['title' => 'Thriller', 'id' => 'row4', 'movies' => $data['thriller']])
-    </div>
+    </main>
 
     <!-- Floating Toast Notifications -->
     @if(session('success'))
@@ -130,16 +128,5 @@
         </div>
     </div>
 
-    <script>
-        const navbar = document.getElementById('navbar');
-        window.onscroll = () => {
-            if (window.scrollY > 50) navbar.classList.add('navbar-blur');
-            else navbar.classList.remove('navbar-blur');
-        };
-
-        function scrollSlider(id, offset) {
-            document.getElementById(id).scrollBy({ left: offset, behavior: 'smooth' });
-        }
-    </script>
 </body>
 </html>

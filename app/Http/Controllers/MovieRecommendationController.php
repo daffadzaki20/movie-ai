@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class MovieRecommendationController extends Controller
 {
     // Helper untuk mengambil poster dari TMDB dengan Cache
-    private function getMoviePoster($title)
+    public function getMoviePoster($title)
     {
         return cache()->remember('poster_' . md5($title), 86400, function () use ($title) {
             try {
@@ -77,9 +77,15 @@ class MovieRecommendationController extends Controller
                     $searchedMovie = $data['searched_movie'] ?? $movieTitle;
 
                     foreach ($titles as $title) {
+                        $dbMovie = Movie::where('title', $title)->first();
+                        $movieId = $dbMovie ? $dbMovie->movie_id : null;
+                        $inList = $movieId ? \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movieId)->exists() : false;
+
                         $recommendations[] = [
                             'title' => $title,
-                            'poster' => $this->getMoviePoster($title)
+                            'poster' => $this->getMoviePoster($title),
+                            'movie_id' => $movieId,
+                            'inList' => $inList
                         ];
                     }
                 } else {
@@ -97,12 +103,14 @@ class MovieRecommendationController extends Controller
     public function show($movie_id)
     {
         $movie = Movie::where('movie_id', $movie_id)->firstOrFail();
-        return view('movie_detail', compact('movie'));
+        $inList = \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movie->movie_id)->exists();
+        return view('movie_detail', compact('movie', 'inList'));
     }
 
     public function detail($id)
     {
         $movie = Movie::findOrFail($id);
-        return view('movie_detail', compact('movie'));
+        $inList = \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movie->movie_id)->exists();
+        return view('movie_detail', compact('movie', 'inList'));
     }
 }
