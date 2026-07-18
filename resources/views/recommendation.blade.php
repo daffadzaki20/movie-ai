@@ -54,10 +54,21 @@
                         </div>
                         
                         <!-- Judul -->
-                        <div>
+                        <div class="flex-1">
                             <span class="text-indigo-400 font-bold text-sm block mb-1">#{{ $loop->iteration }}</span>
                             <h4 class="text-lg font-bold group-hover:text-indigo-300 transition">{{ $movie['title'] }}</h4>
                         </div>
+
+                        <!-- Tombol Tambah ke My List -->
+                        @if($movie['movie_id'])
+                        <button class="myListBtn bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-full transition-all flex items-center justify-center flex-shrink-0 border {{ $movie['inList'] ? 'border-green-500' : 'border-transparent' }}" data-movie-id="{{ $movie['movie_id'] }}">
+                            @if($movie['inList'])
+                                <span class="text-green-400 font-bold">✓</span>
+                            @else
+                                <span class="text-white font-bold">+</span>
+                            @endif
+                        </button>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -74,5 +85,37 @@
         <a href="/dashboard" class="text-slate-500 hover:text-white transition underline underline-offset-8">Kembali ke Dashboard</a>
     </div>
 
+    <script>
+        document.querySelectorAll('.myListBtn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent navigating if wrapped in a link
+                const movieId = this.getAttribute('data-movie-id');
+                
+                fetch('/my-list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ movie_id: movieId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.action === 'added') {
+                            this.innerHTML = '<span class="text-green-400 font-bold">✓</span>';
+                            this.classList.add('border-green-500');
+                            this.classList.remove('border-transparent');
+                        } else {
+                            this.innerHTML = '<span class="text-white font-bold">+</span>';
+                            this.classList.add('border-transparent');
+                            this.classList.remove('border-green-500');
+                        }
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+        });
+    </script>
 </body>
 </html>

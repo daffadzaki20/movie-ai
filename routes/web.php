@@ -21,6 +21,10 @@ Route::middleware(['auth'])->group(function () {
     
     // Halaman khusus untuk hasil rekomendasi AI
     Route::get('/recommend', [MovieRecommendationController::class, 'index'])->name('recommend');
+
+    // My List
+    Route::get('/my-list', [App\Http\Controllers\MyListController::class, 'index'])->name('my-list.index');
+    Route::post('/my-list', [App\Http\Controllers\MyListController::class, 'store'])->name('my-list.store');
 });
 
 Route::get('/movie/{movie_id}', [MovieRecommendationController::class, 'show'])->middleware('auth');
