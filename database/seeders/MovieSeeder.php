@@ -30,11 +30,23 @@ class MovieSeeder extends Seeder
 
         // Looping untuk memasukkan data baris demi baris
         while (($data = fgetcsv($file)) !== FALSE) {
+            // Ekstrak dan parsing JSON genres menjadi teks (contoh: "Action, Comedy")
+            $genresString = '';
+            if (isset($data[1]) && !empty($data[1])) {
+                $genresArray = json_decode($data[1], true);
+                if (is_array($genresArray)) {
+                    $genreNames = array_column($genresArray, 'name');
+                    $genresString = implode(', ', $genreNames);
+                }
+            }
+
             Movie::create([
-                // Sesuaikan indeks kolom CSV TMDB 5000 (3 = id, 17 = title, 6 = overview)
-                'movie_id' => isset($data[3]) && is_numeric($data[3]) ? $data[3] : rand(1000, 99999),
-                'title'    => $data[17] ?? ($data[19] ?? 'Unknown Movie'),
-                'overview' => $data[6] ?? 'No overview available.',
+                // Sesuaikan indeks kolom CSV TMDB 5000
+                'movie_id'   => isset($data[3]) && is_numeric($data[3]) ? $data[3] : rand(1000, 99999),
+                'title'      => $data[17] ?? ($data[19] ?? 'Unknown Movie'),
+                'overview'   => $data[6] ?? 'No overview available.',
+                'genres'     => $genresString,
+                'popularity' => isset($data[8]) && is_numeric($data[8]) ? (float) $data[8] : 0,
             ]);
         }
 

@@ -16,6 +16,8 @@ return new class extends Migration
         $table->integer('movie_id')->unique(); // ID unik dari dataset/CSV film
         $table->string('title');               // Judul film
         $table->text('overview')->nullable();  // Sinopsis film
+        $table->string('genres')->nullable();  // Genre film (e.g., "Action, Comedy")
+        $table->float('popularity')->default(0); // Tingkat popularitas
         $table->timestamps();
     });
 }

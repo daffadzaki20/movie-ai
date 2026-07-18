@@ -33,24 +33,27 @@ class MovieRecommendationController extends Controller
 
     public function dashboard()
     {
-        // Menggunakan data acak karena tidak ada kolom 'genre' di database
-        $categories = [
-            'populer'  => Movie::latest()->limit(10)->get(),
-            'action'   => Movie::inRandomOrder()->limit(10)->get(),
-            'drama'    => Movie::inRandomOrder()->limit(10)->get(),
-            'thriller' => Movie::inRandomOrder()->limit(10)->get(),
-            'comedy'   => Movie::inRandomOrder()->limit(10)->get(),
-        ];
+        // Menyimpan hasil query dan poster di dalam Cache selama 1 jam (3600 detik)
+        // Ini mencegah website lambat akibat 50 request API ke TMDB setiap kali halaman di-refresh
+        $data = cache()->remember('dashboard_movies_data', 3600, function () {
+            $categories = [
+                'populer'  => Movie::orderBy('popularity', 'desc')->limit(10)->get(),
+                'action'   => Movie::where('genres', 'like', '%Action%')->orderBy('popularity', 'desc')->limit(10)->get(),
+                'drama'    => Movie::where('genres', 'like', '%Drama%')->orderBy('popularity', 'desc')->limit(10)->get(),
+                'thriller' => Movie::where('genres', 'like', '%Thriller%')->orderBy('popularity', 'desc')->limit(10)->get(),
+                'comedy'   => Movie::where('genres', 'like', '%Comedy%')->orderBy('popularity', 'desc')->limit(10)->get(),
+            ];
 
-        // Menyisipkan URL poster ke setiap objek film menggunakan mapping
-        foreach ($categories as $key => $movies) {
-            $categories[$key] = $movies->map(function ($movie) {
-                $movie->poster_url = $this->getMoviePoster($movie->title);
-                return $movie;
-            });
-        }
+            // Menyisipkan URL poster ke setiap objek film menggunakan mapping
+            foreach ($categories as $key => $movies) {
+                $categories[$key] = $movies->map(function ($movie) {
+                    $movie->poster_url = $this->getMoviePoster($movie->title);
+                    return $movie;
+                });
+            }
+            return $categories;
+        });
         
-        $data = $categories;
         return view('dashboard', compact('data'));
     }
 
