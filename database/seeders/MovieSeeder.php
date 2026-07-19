@@ -8,12 +8,21 @@ use Illuminate\Support\Facades\DB;
 
 class MovieSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // 1. Kosongkan tabel movies terlebih dahulu agar bersih
+        // 1. Matikan pengecekan foreign key agar bisa truncate tabel yang berelasi
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        // 2. Kosongkan tabel movies terlebih dahulu agar bersih
         DB::table('movies')->truncate();
 
-        // 2. Tentukan lokasi file CSV film kamu di folder python (ai)
+        // 3. Nyalakan kembali pengecekan foreign key
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // 4. Tentukan lokasi file CSV film kamu di folder python (ai)
         $csvFile = base_path('AI/dataset/tmdb_5000_movies.csv');
 
         // Cek apakah filenya ada
@@ -22,7 +31,7 @@ class MovieSeeder extends Seeder
             return;
         }
 
-        // 3. Baca file CSV
+        // 5. Baca file CSV
         $file = fopen($csvFile, 'r');
         $header = fgetcsv($file); // Lewati baris pertama (header)
 

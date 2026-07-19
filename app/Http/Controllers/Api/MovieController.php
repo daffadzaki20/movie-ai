@@ -15,7 +15,7 @@ class MovieController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $movies
+            'data'    => $movies    
         ], 200);
     }
 }

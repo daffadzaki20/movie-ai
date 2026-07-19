@@ -4,6 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string $movie_id
+ * @property string $genres
+ */
 class Movie extends Model
 {
     // Mengizinkan semua kolom diisi secara massal dari file CSV
