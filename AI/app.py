@@ -1,24 +1,20 @@
 from flask import Flask, request, jsonify
-import requests
 import pandas as pd
+import os
+import difflib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-URL = "http://127.0.0.1:8000/api/movies"
 df = None
 cosine_sim = None
 
 def init_data():
     global df, cosine_sim
     try:
-        response = requests.get(URL)
-        data = response.json()
-        
-      
-        df = pd.DataFrame(data['data'])
-        
+        csv_path = os.path.join('dataset', 'tmdb_5000_movies.csv')
+        df = pd.read_csv(csv_path)
         
         if 'overview' not in df.columns or 'title' not in df.columns:
             print(f"⚠️ Error: Kolom yang diterima: {df.columns.tolist()}")
@@ -27,6 +23,8 @@ def init_data():
         df['overview'] = df['overview'].fillna('')
         df['title_lower'] = df['title'].str.lower()
         
+        # PENTING: Reset index agar posisi baris sinkron dengan matrix cosine similarity
+        df = df.reset_index(drop=True)
         
         tfidf = TfidfVectorizer(stop_words='english')
         tfidf_matrix = tfidf.fit_transform(df['overview'])
@@ -38,24 +36,32 @@ def init_data():
         print(f"⚠️ Gagal inisialisasi: {e}")
         return False
 
-
 init_data()
 
 @app.route('/api/recommend', methods=['GET'])
 def recommend():
     movie_title = request.args.get('movie', '') 
-    if df is None:
+    if df is None or cosine_sim is None:
         return jsonify({'success': False, 'message': 'Data belum siap'}), 500
         
     if not movie_title:
         return jsonify({'success': False, 'message': 'Judul film kosong'}), 400
         
-  
-    filtered = df[df['title_lower'] == movie_title.lower()]
-    if filtered.empty:
+    all_titles = df['title'].tolist()
+    close_matches = difflib.get_close_matches(movie_title, all_titles, n=1, cutoff=0.3)
+    
+    if not close_matches:
         return jsonify({'success': False, 'message': 'Film tidak ditemukan'}), 404
         
-    idx = filtered.index[0]
+    matched_title = close_matches[0]
+    
+    # Mengambil indeks baris yang valid setelah di-reset
+    matched_rows = df[df['title'] == matched_title]
+    if matched_rows.empty:
+        return jsonify({'success': False, 'message': 'Film tidak ditemukan'}), 404
+        
+    idx = matched_rows.index[0]
+    
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
     
@@ -63,7 +69,7 @@ def recommend():
     
     return jsonify({
         'success': True,
-        'searched_movie': df.iloc[idx]['title'],
+        'searched_movie': matched_title,
         'recommendations': recs
     })
 

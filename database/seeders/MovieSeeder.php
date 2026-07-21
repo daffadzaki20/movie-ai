@@ -10,8 +10,10 @@ class MovieSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Kosongkan tabel movies terlebih dahulu agar bersih
-        DB::table('movies')->truncate();
+        // 1. Nonaktifkan foreign key checks sementara & kosongkan tabel movies
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('movies')->delete();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // 2. Tentukan lokasi file CSV film kamu di folder python (ai)
         $csvFile = base_path('AI/dataset/tmdb_5000_movies.csv');
