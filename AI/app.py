@@ -61,6 +61,7 @@ def init_data():
         return True
     except Exception as e:
         print(f"Gagal inisialisasi: {e}")
+        print(f"Gagal inisialisasi: {e}")
         return False
 
 init_data()
