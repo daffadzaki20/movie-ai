@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Movie;
+use App\Models\MyList;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class MovieRecommendationController extends Controller
 {
@@ -33,8 +35,6 @@ class MovieRecommendationController extends Controller
 
     public function dashboard()
     {
-        // Menyimpan hasil query dan poster di dalam Cache selama 1 jam (3600 detik)
-        // Ini mencegah website lambat akibat 50 request API ke TMDB setiap kali halaman di-refresh
         $data = cache()->remember('dashboard_movies_data', 3600, function () {
             $categories = [
                 'populer'  => Movie::orderBy('popularity', 'desc')->limit(10)->get(),
@@ -44,7 +44,6 @@ class MovieRecommendationController extends Controller
                 'comedy'   => Movie::where('genres', 'like', '%Comedy%')->orderBy('popularity', 'desc')->limit(10)->get(),
             ];
 
-            // Menyisipkan URL poster ke setiap objek film menggunakan mapping
             foreach ($categories as $key => $movies) {
                 $categories[$key] = $movies->map(function ($movie) {
                     $movie->poster_url = $this->getMoviePoster($movie->title);
@@ -61,6 +60,9 @@ class MovieRecommendationController extends Controller
     {
         $recommendations = [];
         $searchedMovie = null;
+        $searchedPoster = null;
+        $searchedMovieId = null; // Tambahan ID untuk film utama
+        $searchedInList = false; // Tambahan status list untuk film utama
         $error = null;
 
         if ($request->has('movie') && !empty($request->input('movie'))) {
@@ -76,14 +78,26 @@ class MovieRecommendationController extends Controller
                     $titles = $data['recommendations'] ?? [];
                     $searchedMovie = $data['searched_movie'] ?? $movieTitle;
 
-                    foreach ($titles as $title) {
-                        $dbMovie = Movie::where('title', $title)->first();
+                    // Ambil poster, ID, dan status My List untuk film utama yang dicari
+                    $searchedPoster = $this->getMoviePoster($searchedMovie);
+                    $dbSearchedMovie = Movie::where('title', 'like', '%' . $searchedMovie . '%')->first();
+                    if ($dbSearchedMovie) {
+                        $searchedMovieId = $dbSearchedMovie->movie_id;
+                        $searchedInList = MyList::where('user_id', Auth::id())->where('movie_id', $searchedMovieId)->exists();
+                    }
+
+                    foreach ($titles as $item) {
+                        // $item adalah array/dict dari Python, contoh: ['title' => 'Batman', 'tmdbId' => 123, 'score' => 0.5]
+                        $movieTitleStr = is_array($item) ? $item['title'] : $item;
+                        
+                        $dbMovie = Movie::where('title', 'like', '%' . $movieTitleStr . '%')->first();
+                        
                         $movieId = $dbMovie ? $dbMovie->movie_id : null;
-                        $inList = $movieId ? \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movieId)->exists() : false;
+                        $inList = $movieId ? MyList::where('user_id', Auth::id())->where('movie_id', $movieId)->exists() : false;
 
                         $recommendations[] = [
-                            'title' => $title,
-                            'poster' => $this->getMoviePoster($title),
+                            'title' => $movieTitleStr,
+                            'poster' => $this->getMoviePoster($movieTitleStr),
                             'movie_id' => $movieId,
                             'inList' => $inList
                         ];
@@ -97,20 +111,27 @@ class MovieRecommendationController extends Controller
             }
         }
 
-        return view('recommendation', compact('recommendations', 'searchedMovie', 'error'));
+        return view('recommendation', compact(
+            'recommendations', 
+            'searchedMovie', 
+            'searchedPoster', 
+            'searchedMovieId', 
+            'searchedInList', 
+            'error'
+        ));
     }
 
     public function show($movie_id)
     {
         $movie = Movie::where('movie_id', $movie_id)->firstOrFail();
-        $inList = \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movie->movie_id)->exists();
+        $inList = MyList::where('user_id', Auth::id())->where('movie_id', $movie->movie_id)->exists();
         return view('movie_detail', compact('movie', 'inList'));
     }
 
     public function detail($id)
     {
         $movie = Movie::findOrFail($id);
-        $inList = \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movie->movie_id)->exists();
+        $inList = MyList::where('user_id', Auth::id())->where('movie_id', $movie->movie_id)->exists();
         return view('movie_detail', compact('movie', 'inList'));
     }
 }

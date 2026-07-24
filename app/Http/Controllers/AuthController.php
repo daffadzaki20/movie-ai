@@ -16,7 +16,6 @@ class AuthController extends Controller
     
     public function login(Request $request) 
     {
-        
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -26,7 +25,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect('/dashboard');
+
+            // Cek role user, jika admin arahkan ke dashboard admin
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended('/admin/dashboard');
+            }
+
+            // Jika user biasa, arahkan ke dashboard utama
+            return redirect()->intended('/dashboard');
         }
 
         return back()->withErrors(['email' => 'Email atau password salah!']);
@@ -39,7 +45,6 @@ class AuthController extends Controller
     
     public function register(Request $request) 
     {
-        
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -50,6 +55,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'user', // Set default role sebagai user biasa
         ]);
 
         return redirect('/login')->with('success', 'Akun berhasil dibuat! Silakan login.');

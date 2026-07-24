@@ -1,36 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My List - MOVIEAI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .navbar-blur { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); }
-    </style>
-</head>
-<body class="bg-slate-950 text-white font-sans min-h-screen">
-    
-    <!-- Navbar -->
-    <nav id="navbar" class="fixed w-full z-50 p-6 flex justify-between items-center transition-all duration-300 navbar-blur">
-        <h2 class="text-3xl font-bold text-red-600 tracking-tighter cursor-pointer">MOVIEAI</h2>
-        <div class="flex gap-8 items-center font-medium text-slate-300">
-            <a href="/dashboard" class="hover:text-white transition">Home</a>
-            <a href="/genre" class="hover:text-white transition">Genre</a>
-            <a href="/recommend" class="hover:text-white transition">Rekomendasi AI</a>
-            <a href="/my-list" class="text-white border-b-2 border-red-600">My List</a>
-        </div>
-        <div class="flex gap-4 items-center">
-            <a href="/profile" class="hover:text-red-500 transition font-bold">Profile</a>
-            <form action="/logout" method="POST">
-                @csrf
-                <button class="bg-red-600 px-5 py-2 rounded-lg hover:bg-red-700 transition font-bold text-white">Logout</button>
-            </form>
-        </div>
-    </nav>
+@extends('layouts.app')
 
-    <!-- Content -->
-    <div class="pt-32 px-12 pb-12 max-w-7xl mx-auto">
+@section('title', 'My List - MOVIEAI')
+
+@section('content')
+    <div class="px-12 max-w-7xl mx-auto">
         <h1 class="text-4xl font-extrabold mb-8 border-l-4 border-red-600 pl-4">My List</h1>
         
         @if($movies->isEmpty())
@@ -70,7 +43,9 @@
             </div>
         @endif
     </div>
+@endsection
 
+@section('scripts')
     <script>
         document.querySelectorAll('.removeBtn').forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -90,7 +65,6 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.action === 'removed') {
-                        // Remove the card from UI
                         const card = document.getElementById('movie-card-' + movieId);
                         if (card) {
                             card.style.opacity = '0';
@@ -102,5 +76,4 @@
             });
         });
     </script>
-</body>
-</html>
+@endsection

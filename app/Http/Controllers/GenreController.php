@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Movie;
+use App\Models\MyList;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\MovieRecommendationController;
 
 class GenreController extends Controller
@@ -20,18 +22,20 @@ class GenreController extends Controller
         return view('genres.index', compact('genres'));
     }
 
-    public function show($name)
+    public function show(string $name)
     {
         // Get movies with this genre, paginated
         $movies = Movie::where('genres', 'like', '%' . $name . '%')
-                       ->orderBy('popularity', 'desc')
-                       ->paginate(24);
-                       
+                    ->orderBy('popularity', 'desc')
+                    ->paginate(24);
+                    
         // Fetch posters for current page
         $movieController = new MovieRecommendationController();
+        $userId = Auth::id(); // Menggunakan Auth::id() agar seragam
+
         foreach ($movies as $movie) {
             $movie->poster_url = $movieController->getMoviePoster($movie->title);
-            $movie->inList = \App\Models\MyList::where('user_id', auth()->id())->where('movie_id', $movie->movie_id)->exists();
+            $movie->inList = $userId ? MyList::where('user_id', $userId)->where('movie_id', $movie->movie_id)->exists() : false;
         }
 
         return view('genres.show', compact('movies', 'name'));
