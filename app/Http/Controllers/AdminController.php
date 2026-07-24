@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Movie;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
@@ -38,6 +39,7 @@ class AdminController extends Controller
             'popularity' => $request->popularity,
         ]);
 
+        Cache::forget('dashboard_movies_data');
         return redirect()->route('admin.dashboard')->with('success', 'Film berhasil ditambahkan!');
     }
 
@@ -66,6 +68,7 @@ class AdminController extends Controller
             'popularity' => $request->popularity,
         ]);
 
+        Cache::forget('dashboard_movies_data');
         return redirect()->route('admin.dashboard')->with('success', 'Film berhasil diperbarui!');
     }
 
@@ -75,6 +78,7 @@ class AdminController extends Controller
         $movie = Movie::findOrFail($id);
         $movie->delete();
 
+        Cache::forget('dashboard_movies_data');
         return redirect()->route('admin.dashboard')->with('success', 'Film berhasil dihapus!');
     }
 }

@@ -1,23 +1,19 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $movie->title }} - Detail Film</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+@extends('layouts.app')
+
+@section('title', $movie->title . ' - Detail Film')
+
+@section('content')
     <style>
         /* Animasi Fade In */
         .fade-in { animation: fadeIn 0.8s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-</head>
-<body class="bg-black text-white font-sans overflow-x-hidden selection:bg-red-600 selection:text-white">
 
     <!-- Background Dekoratif -->
     <div class="fixed top-0 left-0 w-full h-full bg-slate-950 -z-10"></div>
     <div class="fixed top-0 left-0 w-full h-1/2 bg-gradient-to-b from-red-900/20 to-transparent -z-10"></div>
 
-    <div class="max-w-6xl mx-auto p-8 lg:p-12 fade-in space-y-10">
+    <div class="max-w-6xl mx-auto px-6 fade-in space-y-10">
         
         <!-- Tombol Kembali -->
         <div>
@@ -32,7 +28,7 @@
             
             <!-- KOLOM KIRI: Poster Film -->
             <div class="lg:col-span-1">
-                <div class="bg-white/5 p-4 rounded-3xl border border-white/10 shadow-2xl overflow-hidden sticky top-8">
+                <div class="bg-white/5 p-4 rounded-3xl border border-white/10 shadow-2xl overflow-hidden sticky top-32">
                     <img id="movie-poster" src="" alt="Poster Film" class="w-full h-auto rounded-2xl object-cover shadow-lg">
                 </div>
             </div>
@@ -105,7 +101,9 @@
         </div>
 
     </div>
+@endsection
 
+@section('scripts')
     <script>
         const movieId = "{{ $movie->movie_id }}";
         const apiKey = "527f6b11a69b31736bbbeede25f614b1"; 
@@ -231,5 +229,4 @@
             });
         }
     </script>
-</body>
-</html>
+@endsection

@@ -86,15 +86,18 @@ class MovieRecommendationController extends Controller
                         $searchedInList = MyList::where('user_id', Auth::id())->where('movie_id', $searchedMovieId)->exists();
                     }
 
-                    foreach ($titles as $title) {
-                        $dbMovie = Movie::where('title', 'like', '%' . $title . '%')->first();
+                    foreach ($titles as $item) {
+                        // $item adalah array/dict dari Python, contoh: ['title' => 'Batman', 'tmdbId' => 123, 'score' => 0.5]
+                        $movieTitleStr = is_array($item) ? $item['title'] : $item;
+                        
+                        $dbMovie = Movie::where('title', 'like', '%' . $movieTitleStr . '%')->first();
                         
                         $movieId = $dbMovie ? $dbMovie->movie_id : null;
                         $inList = $movieId ? MyList::where('user_id', Auth::id())->where('movie_id', $movieId)->exists() : false;
 
                         $recommendations[] = [
-                            'title' => $title,
-                            'poster' => $this->getMoviePoster($title),
+                            'title' => $movieTitleStr,
+                            'poster' => $this->getMoviePoster($movieTitleStr),
                             'movie_id' => $movieId,
                             'inList' => $inList
                         ];
