@@ -32,10 +32,10 @@ def init_data():
         tfidf_matrix = tfidf.fit_transform(df['overview'])
         cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
         
-        print("✅ Sistem AI Siap!")
+        print("Sistem AI Siap!")
         return True
     except Exception as e:
-        print(f"⚠️ Gagal inisialisasi: {e}")
+        print(f"Gagal inisialisasi: {e}")
         return False
 
 
