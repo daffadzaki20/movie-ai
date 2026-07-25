@@ -32,26 +32,34 @@ class MovieSeeder extends Seeder
 
         // Looping untuk memasukkan data baris demi baris
         while (($data = fgetcsv($file)) !== FALSE) {
-            // Ekstrak dan parsing JSON genres menjadi teks (contoh: "Action, Comedy")
+            // Pastikan baris CSV valid dan memiliki jumlah kolom yang cukup
+            if (!isset($data[18])) {
+                continue;
+            }
+
+            // 1. Ekstrak dan parsing JSON genres (berada di indeks 3)
             $genresString = '';
-            if (isset($data[1]) && !empty($data[1])) {
-                $genresArray = json_decode($data[1], true);
+            if (isset($data[3]) && !empty($data[3])) {
+                // Bersihkan format petik tunggal jika ada pada string JSON dari CSV
+                $jsonClean = str_replace("'", '"', $data[3]);
+                $genresArray = json_decode($jsonClean, true);
                 if (is_array($genresArray)) {
                     $genreNames = array_column($genresArray, 'name');
                     $genresString = implode(', ', $genreNames);
                 }
             }
 
-            $movieId = isset($data[3]) && is_numeric($data[3]) ? $data[3] : rand(1000, 99999);
+            // 2. Ambil ID film (berada di indeks 5)
+            $movieId = isset($data[5]) && is_numeric($data[5]) ? $data[5] : rand(1000, 99999);
 
-            // Gunakan updateOrCreate untuk mencegah error duplicate entry
+            // 3. Gunakan updateOrCreate untuk mencegah error duplicate entry dengan indeks kolom yang benar
             Movie::updateOrCreate(
                 ['movie_id' => $movieId], // Kunci pencarian unik
                 [
-                    'title'      => $data[17] ?? ($data[19] ?? 'Unknown Movie'),
-                    'overview'   => $data[6] ?? 'No overview available.',
+                    'title'      => !empty($data[8]) ? $data[8] : (!empty($data[18]) ? $data[18] : 'Unknown Movie'), // Judul film
+                    'overview'   => !empty($data[9]) ? $data[9] : 'No overview available.', // Sinopsis film
                     'genres'     => $genresString,
-                    'popularity' => isset($data[8]) && is_numeric($data[8]) ? (float) $data[8] : 0,
+                    'popularity' => isset($data[10]) && is_numeric($data[10]) ? (float) $data[10] : 0, // Tingkat popularitas
                 ]
             );
         }
