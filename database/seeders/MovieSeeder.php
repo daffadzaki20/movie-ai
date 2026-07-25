@@ -16,7 +16,7 @@ class MovieSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // 2. Tentukan lokasi file CSV film kamu di folder python (ai)
-        $csvFile = base_path('AI/dataset/tmdb_5000_movies.csv');
+        $csvFile = base_path('AI/dataset/movies_metadata.csv');
 
         // Cek apakah filenya ada
         if (!file_exists($csvFile)) {
@@ -42,14 +42,18 @@ class MovieSeeder extends Seeder
                 }
             }
 
-            Movie::create([
-                // Sesuaikan indeks kolom CSV TMDB 5000
-                'movie_id'   => isset($data[3]) && is_numeric($data[3]) ? $data[3] : rand(1000, 99999),
-                'title'      => $data[17] ?? ($data[19] ?? 'Unknown Movie'),
-                'overview'   => $data[6] ?? 'No overview available.',
-                'genres'     => $genresString,
-                'popularity' => isset($data[8]) && is_numeric($data[8]) ? (float) $data[8] : 0,
-            ]);
+            $movieId = isset($data[3]) && is_numeric($data[3]) ? $data[3] : rand(1000, 99999);
+
+            // Gunakan updateOrCreate untuk mencegah error duplicate entry
+            Movie::updateOrCreate(
+                ['movie_id' => $movieId], // Kunci pencarian unik
+                [
+                    'title'      => $data[17] ?? ($data[19] ?? 'Unknown Movie'),
+                    'overview'   => $data[6] ?? 'No overview available.',
+                    'genres'     => $genresString,
+                    'popularity' => isset($data[8]) && is_numeric($data[8]) ? (float) $data[8] : 0,
+                ]
+            );
         }
 
         fclose($file);
