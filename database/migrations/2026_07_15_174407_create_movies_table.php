@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('movies', function (Blueprint $table) {
         $table->id();
         $table->integer('movie_id')->unique(); // ID unik dari dataset/CSV film
-        $table->string('title');               // Judul film
+        $table->text('title');               // Judul film
         $table->text('overview')->nullable();  // Sinopsis film
         $table->string('genres')->nullable();  // Genre film (e.g., "Action, Comedy")
         $table->float('popularity')->default(0); // Tingkat popularitas
